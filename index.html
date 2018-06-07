@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <div>
+                name: <input type="text" v-model="name"> <br>
+                email: <input type="text" v-model="email"><br> 
+                <br>
+                <button v-on:click="inputUsername()">Submit</button>   
+            </div>
+        </div>
+        <br>
+        <br>
+        <br>
+
+        <div class="container">
+            <div>
+                <label>
+                <input type="file" id="file" ref="file" v-on:change="handleFileUpload()"/>
+                </label>
+                <br>
+                <br>
+                <button v-on:click="submitFile()">Submit</button>
+            </div>
+        </div>
+        <br>
+        <br>
+        <br>
+        <div class="container">
+            display image here
+           
+        </div>
+    </div>
+   
+    
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+    let app = new Vue({ 
+        el: "#app",
+        data:{
+            file: "",
+            token:"",
+            name: "",
+            email: "",
+            uuid: "",
+        },
+        methods: {
+            inputUsername(){
+                let self = this;
+                axios.post("http://35.197.135.159/request-token", {
+                    name: self.name,
+                    email: self.email,
+                })
+                .then(function(response){
+                    self.uuid = response.data.uuid;
+                    console.log(self.uuid);
+                })
+                .catch(function(err){
+                    console.log(err);
+                })
+                
+            },
+            handleFileUpload(){
+                this.file = this.$refs.file.files[0];
+            },
+            submitFile(){
+                let self  = this;
+                let formData = new FormData();
+                formData.append("file", this.file);
+                console.log("----", self.uuid);
+
+                axios.post( 'http://35.197.135.159/image',
+                formData,
+                {
+                    headers: {
+                        "authorization": self.uuid,
+                        'Content-Type': 'multipart/form-data'
+                     }
+                }).then(function(response){
+                    console.log("-x-x-", response)
+                    console.log('SUCCESS!!');
+                    axios.get("http://35.197.135.159/image",{
+                        headers: {
+                            "authorization": self.uuid,
+                        }
+                    })
+                    .then(function(response){
+                        console.log(response);
+                    })
+                    .catch(function(err){
+                        console.log(err);
+                    })
+                })
+                .catch(function(){
+                    console.log('FAILURE!!');
+                 });
+            },
+
+        
+        },
+
+    });
+    </script>
+</body>
+</html>
